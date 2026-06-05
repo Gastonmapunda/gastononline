@@ -370,6 +370,35 @@
             position: sticky;
             top: 0;
             z-index: 40;
+            transition: transform 0.25s ease, opacity 0.25s ease;
+        }
+
+        .top-navbar.hidden {
+            transform: translateY(-120%);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .navbar-toggle-floating {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            z-index: 60;
+            padding: 10px 14px;
+            border-radius: 999px;
+            border: none;
+            background: var(--primary);
+            color: white;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .navbar-toggle-floating.hidden {
+            display: none;
         }
 
         .system-title {
@@ -885,10 +914,10 @@
                 <span class="brand">Smart<span>POS</span></span>
             </div>
             <div class="sidebar-menu">
-                <div class="menu-item active" data-page="dashboard" onclick="showPage('dashboard')">
+                <div class="menu-item" data-page="dashboard" onclick="showPage('dashboard')">
                     <span class="icon">📊</span> Dashboard
                 </div>
-                <div class="menu-item" data-page="pos" onclick="showPage('pos')">
+                <div class="menu-item active" data-page="pos" onclick="showPage('pos')">
                     <span class="icon">🛒</span> POS (Mauzo)
                 </div>
                 <div class="menu-item" data-page="stock" onclick="showPage('stock')">
@@ -928,7 +957,8 @@
                 <div class="system-title">Smart<span>POS</span> Mfumo</div>
                 <div class="top-nav-actions">
                     <div class="nav-tabs">
-                        <button class="nav-button active" data-page="dashboard" onclick="showPage('dashboard')">🏠 Home</button>
+                        <button class="nav-button" data-page="dashboard" onclick="showPage('dashboard')">🏠 Home</button>
+                        <button class="nav-button active" data-page="pos" onclick="showPage('pos')">🛒 POS</button>
                         <button class="nav-button" data-page="stock" onclick="showPage('stock')">📚 Stock</button>
                         <button class="nav-button" data-page="purchases" onclick="showPage('purchases')">📥 Purchases</button>
                         <button class="nav-button" data-page="expenses" onclick="showPage('expenses')">💸 Expenses</button>
@@ -936,12 +966,13 @@
                         <button class="nav-button" data-page="reports" onclick="showPage('reports')">📈 Ripoti</button>
                         <button class="nav-button" data-page="settings" onclick="showPage('settings')">⚙️ Settings</button>
                     </div>
-                    <button class="btn btn-primary btn-sm" onclick="toggleSidebar()">☰ Menu</button>
+                    <button class="btn btn-primary btn-sm" onclick="toggleTopNavbar()">☰ Menu</button>
                 </div>
             </div>
+            <button class="navbar-toggle-floating hidden" id="navbarToggleFloating" onclick="showTopNavbar()">☰ Menu</button>
 
             <!-- Dashboard -->
-            <div class="page active" id="page-dashboard">
+            <div class="page" id="page-dashboard">
                 <div class="page-header">
                     <div>
                         <h2>Dashboard</h2>
@@ -1009,7 +1040,7 @@
             </div>
 
             <!-- POS (Point of Sale) -->
-            <div class="page" id="page-pos">
+            <div class="page active" id="page-pos">
                 <div class="page-header">
                     <div>
                         <h2>POS - Point of Sale</h2>
@@ -1191,8 +1222,7 @@
                                 </tr>
                             </thead>
                             <tbody id="purchasesTableBody">
-                                <tr><td colspaon" data-page="pos" onclick="showPage('pos')">🛒 POS</button>
-                        <button class="nav-buttn="6" style="text-align:center; color:var(--gray);">Hakuna manunuzi</td></tr>
+                                <tr><td colspan="6" style="text-align:center; color:var(--gray);">Hakuna manunuzi</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -1439,7 +1469,7 @@
                 }
 
                 initApp();
-                showPage('dashboard');
+                showPage('pos');
                 showToast('Karibu, ' + user.fullName + '!');
             } else {
                 showToast('Jina au nenosiri si sahihi', 'error');
@@ -1465,6 +1495,11 @@
             if (menuItem) menuItem.classList.add('active');
             setActiveDashboardTab(page);
             setActiveTopNav(page);
+            if (page !== 'dashboard') {
+                hideTopNavbar();
+            } else {
+                showTopNavbar();
+            }
         }
 
         function setActiveDashboardTab(page) {
@@ -1477,6 +1512,32 @@
             document.querySelectorAll('.nav-button').forEach(btn => {
                 btn.classList.toggle('active', btn.dataset.page === page);
             });
+        }
+
+        function hideTopNavbar() {
+            const nav = document.querySelector('.top-navbar');
+            const floating = document.getElementById('navbarToggleFloating');
+            if (!nav || !floating) return;
+            nav.classList.add('hidden');
+            floating.classList.remove('hidden');
+        }
+
+        function showTopNavbar() {
+            const nav = document.querySelector('.top-navbar');
+            const floating = document.getElementById('navbarToggleFloating');
+            if (!nav || !floating) return;
+            nav.classList.remove('hidden');
+            floating.classList.add('hidden');
+        }
+
+        function toggleTopNavbar() {
+            const nav = document.querySelector('.top-navbar');
+            if (!nav) return;
+            if (nav.classList.contains('hidden')) {
+                showTopNavbar();
+            } else {
+                hideTopNavbar();
+            }
         }
 
         function toggleSidebar() {
