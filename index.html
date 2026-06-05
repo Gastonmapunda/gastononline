@@ -808,9 +808,6 @@
                 <div class="menu-item" data-page="users" onclick="showPage('users')" id="usersMenu">
                     <span class="icon">👥</span> Watumiaji
                 </div>
-                <div class="menu-item" data-page="products" onclick="showPage('products')">
-                    <span class="icon">📦</span> Bidhaa
-                </div>
                 <div class="menu-item" data-page="reports" onclick="showPage('reports')">
                     <span class="icon">📈</span> Ripoti
                 </div>
@@ -922,7 +919,11 @@
                                 <span>Jumla Kuu</span>
                                 <span id="grandTotal">TSh 0</span>
                             </div>
-                            <button class="btn btn-success" style="width:100%; margin-top:16px;" onclick="checkout()" id="checkoutBtn">
+                            <div style="margin-top:12px;">
+                                <label style="font-weight:600; font-size:13px; display:block; margin-bottom:6px;">Njia ya Malipo</label>
+                                <select id="paymentMethodSelect" style="width:100%; padding:10px 12px; border:2px solid var(--border); border-radius:8px; background:white; margin-bottom:8px;"></select>
+                            </div>
+                            <button class="btn btn-success" style="width:100%; margin-top:8px;" onclick="checkout()" id="checkoutBtn">
                                 ✅ Maliza Mauzo
                             </button>
                             <button class="btn btn-outline" style="width:100%; margin-top:8px;" onclick="clearCart()">
@@ -962,34 +963,6 @@
                 </div>
             </div>
 
-            <!-- Products -->
-            <div class="page" id="page-products">
-                <div class="page-header">
-                    <div>
-                        <h2>Bidhaa</h2>
-                        <p class="subtitle">Orodha ya bidhaa zako</p>
-                    </div>
-                    <button class="btn btn-primary" onclick="openProductModal()">➕ Bidhaa Mpya</button>
-                </div>
-                <div class="card">
-                    <div class="table-container">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>Jina</th>
-                                    <th>Aina</th>
-                                    <th>Bei</th>
-                                    <th>Hesabu</th>
-                                    <th>Vitendo</th>
-                                </tr>
-                            </thead>
-                            <tbody id="productsTableBody"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
             <!-- Reports -->
             <div class="page" id="page-reports">
                 <div class="page-header">
@@ -997,10 +970,15 @@
                         <h2>Ripoti</h2>
                         <p class="subtitle">Angalia takwimu za biashara yako</p>
                     </div>
-                    <button class="btn btn-primary" onclick="generateReport()">📄 Fungua Ripoti</button>
+                    <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                        <input type="date" id="reportDateInput" style="padding:10px 12px; border:2px solid var(--border); border-radius:8px; background:white;" onchange="handleReportDateChange()" />
+                        <button class="btn btn-success btn-sm" onclick="handleReportDateChange()">🔎 Angalia</button>
+                        <button class="btn btn-primary" onclick="generateReport()">📄 Fungua Ripoti</button>
+                    </div>
                 </div>
                 <div class="card">
-                    <h3 style="margin-bottom:16px;">Ripoti ya Mauzo</h3>
+                    <h3 style="margin-bottom:8px;">Ripoti ya Mauzo</h3>
+                    <p id="reportDateInfo" style="margin-bottom:16px; color:var(--gray);">Chagua tarehe kuonyesha ripoti ya siku zilizopita.</p>
                     <div class="table-container">
                         <table>
                             <thead>
@@ -1009,10 +987,11 @@
                                     <th>Mtumiaji</th>
                                     <th>Idadi ya Bidhaa</th>
                                     <th>Jumla</th>
+                                    <th>Vitendo</th>
                                 </tr>
                             </thead>
                             <tbody id="reportTableBody">
-                                <tr><td colspan="4" style="text-align:center; color:var(--gray);">Hakuna mauzo bado</td></tr>
+                                <tr><td colspan="5" style="text-align:center; color:var(--gray);">Hakuna mauzo bado</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -1043,9 +1022,9 @@
                 <div class="page-header">
                     <div>
                         <h2>Stock</h2>
-                        <p class="subtitle">Orodha na usimamizi wa hesabu</p>
+                        <p class="subtitle">Taarifa za bidhaa kwa kila itemu</p>
+                        <p style="margin-top:8px; color:var(--gray);">Stock details: kila bidhaa inaonyesha opening stock, manunuzi ya leo, iliyouzwa leo, na salio.</p>
                     </div>
-                    <button class="btn btn-primary" onclick="openProductModal()">➕ Bidhaa Mpya</button>
                 </div>
                 <div class="card">
                     <div class="table-container">
@@ -1056,8 +1035,10 @@
                                     <th>Jina</th>
                                     <th>Aina</th>
                                     <th>Bei</th>
-                                    <th>Hesabu</th>
-                                    <th>Vitendo</th>
+                                    <th>Opening Stock</th>
+                                    <th>Purchased Today</th>
+                                    <th>Sold Today</th>
+                                    <th>Remaining</th>
                                 </tr>
                             </thead>
                             <tbody id="stockTableBody"></tbody>
@@ -1085,10 +1066,11 @@
                                     <th>Bidhaa</th>
                                     <th>Kiasi</th>
                                     <th>Bei</th>
+                                    <th>Vitendo</th>
                                 </tr>
                             </thead>
                             <tbody id="purchasesTableBody">
-                                <tr><td colspan="5" style="text-align:center; color:var(--gray);">Hakuna manunuzi</td></tr>
+                                <tr><td colspan="6" style="text-align:center; color:var(--gray);">Hakuna manunuzi</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -1120,10 +1102,11 @@
                                     <th>Maelezo</th>
                                     <th>Category</th>
                                     <th>Kiasi</th>
+                                    <th>Vitendo</th>
                                 </tr>
                             </thead>
                             <tbody id="expensesTableBody">
-                                <tr><td colspan="4" style="text-align:center; color:var(--gray);">Hakuna gharama</td></tr>
+                                <tr><td colspan="5" style="text-align:center; color:var(--gray);">Hakuna gharama</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -1143,6 +1126,19 @@
                     <div style="margin-bottom:16px;">Repo: <a href="https://github.com/Gastonmapunda/gastononline" target="_blank">Gastonmapunda/gastononline</a></div>
                     <h3>Manage Users</h3>
                     <p>Use the <strong>Watumiaji</strong> page to assign roles and manage users. Only admins can access this page.</p>
+                    <h3 style="margin-top:12px;">Payment Methods</h3>
+                    <p style="color:var(--gray);">Ongeza, badilisha au futa njia za malipo ambazo zitapatikana kwenye POS.</p>
+                    <div style="display:flex; gap:8px; margin-top:8px; align-items:center;">
+                        <button class="btn btn-primary" onclick="openPaymentMethodModal()">➕ Add Payment Method</button>
+                    </div>
+                    <div style="margin-top:12px;">
+                        <div class="table-container">
+                            <table>
+                                <thead><tr><th>#</th><th>Jina</th><th>Vitendo</th></tr></thead>
+                                <tbody id="paymentMethodsTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1193,54 +1189,12 @@
         </div>
     </div>
 
-    <!-- Product Modal -->
-    <div class="modal-overlay" id="productModal">
-        <div class="modal">
-            <h3>Bidhaa Mpya</h3>
-            <form id="productForm">
-                <div class="form-group">
-                    <label>Jina la Bidhaa</label>
-                    <input type="text" id="productName" placeholder="Mf: Coke, Bread, Sugar" required>
-                </div>
-                <div class="form-group">
-                    <label>Aina / Kategoria</label>
-                    <select id="productCategory">
-                        <option value="Vinywaji">Vinywaji</option>
-                        <option value="Vyakula">Vyakula</option>
-                        <option value="Mikate">Mikate</option>
-                        <option value="Sabuni">Sabuni</option>
-                        <option value="Mchele">Mchele</option>
-                        <option value="Unga">Unga</option>
-                        <option value="Mafuta">Mafuta</option>
-                        <option value="Sukari">Sukari</option>
-                        <option value="Nyingine">Nyingine</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Bei (TSh)</label>
-                    <input type="number" id="productPrice" placeholder="500" required min="0">
-                </div>
-                <div class="form-group">
-                    <label>Hesabu kwenye Stock</label>
-                    <input type="number" id="productStock" placeholder="100" required min="0">
-                </div>
-                <div class="form-group">
-                    <label>Aikoni (emoji)</label>
-                    <input type="text" id="productIcon" placeholder="🥤 🍞 🧴" value="📦">
-                </div>
-                <div class="modal-actions">
-                    <button type="button" class="btn btn-outline" onclick="closeModal('productModal')">Ghairi</button>
-                    <button type="submit" class="btn btn-primary">Hifadhi</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
     <!-- Purchase Modal -->
     <div class="modal-overlay" id="purchaseModal">
         <div class="modal">
-            <h3>New Purchase</h3>
+            <h3 id="purchaseModalTitle">New Purchase</h3>
             <form id="purchaseForm">
+                <input type="hidden" id="editPurchaseId">
                 <div class="form-group">
                     <label>Bidhaa</label>
                     <select id="purchaseProduct"></select>
@@ -1264,8 +1218,9 @@
     <!-- Expense Modal -->
     <div class="modal-overlay" id="expenseModal">
         <div class="modal">
-            <h3>New Expense</h3>
+            <h3 id="expenseModalTitle">New Expense</h3>
             <form id="expenseForm">
+                <input type="hidden" id="editExpenseId">
                 <div class="form-group">
                     <label>Maelezo</label>
                     <input type="text" id="expenseDesc" required>
@@ -1329,7 +1284,12 @@
         let activityLog = [];
         let currentUser = null;
         let cart = [];
-        let nextId = { user: 3, product: 9, transaction: 1 };
+        let paymentMethods = [
+            { id: 1, name: 'Cash' },
+            { id: 2, name: 'Mobile Money' },
+            { id: 3, name: 'Card' }
+        ];
+        let nextId = { user: 3, product: 9, transaction: 1, paymentMethod: 4 };
 
         // ==================== AUTH & LOGIN ====================
         document.getElementById('loginForm').addEventListener('submit', function(e) {
@@ -1384,7 +1344,6 @@
         // ==================== INITIALIZATION ====================
         function initApp() {
             renderUsers();
-            renderProducts();
             renderProductsGrid();
             renderCategories();
             updateDashboard();
@@ -1500,55 +1459,11 @@
         }
 
         // ==================== PRODUCT MANAGEMENT ====================
-        function renderProducts() {
-            const tbody = document.getElementById('productsTableBody');
-            tbody.innerHTML = products.map((p, i) => `
-                <tr>
-                    <td>${i + 1}</td>
-                    <td>${p.icon} ${p.name}</td>
-                    <td>${p.category}</td>
-                    <td><strong>TSh ${p.price.toLocaleString()}</strong></td>
-                    <td>${p.stock}</td>
-                    <td>
-                        <button class="btn btn-sm btn-danger" onclick="deleteProduct(${p.id})">🗑️</button>
-                    </td>
-                </tr>
-            `).join('');
-        }
-
-        function openProductModal() {
-            document.getElementById('productName').value = '';
-            document.getElementById('productCategory').value = 'Vinywaji';
-            document.getElementById('productPrice').value = '';
-            document.getElementById('productStock').value = '';
-            document.getElementById('productIcon').value = '📦';
-            document.getElementById('productModal').classList.add('active');
-        }
-
-        document.getElementById('productForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const product = {
-                id: nextId.product++,
-                name: document.getElementById('productName').value.trim(),
-                category: document.getElementById('productCategory').value,
-                price: parseInt(document.getElementById('productPrice').value),
-                stock: parseInt(document.getElementById('productStock').value),
-                icon: document.getElementById('productIcon').value || '📦'
-            };
-            products.push(product);
-            closeModal('productModal');
-            renderProducts();
-            renderProductsGrid();
-            renderCategories();
-            updateDashboard();
-            showToast('Bidhaa imeongezwa');
-            logActivity('product', 'aliongeza bidhaa: ' + product.name);
-        });
+        // product management removed
 
         function deleteProduct(id) {
             if (confirm('Una uhakika unataka kufuta bidhaa hii?')) {
                 products = products.filter(p => p.id !== id);
-                renderProducts();
                 renderProductsGrid();
                 renderCategories();
                 updateDashboard();
@@ -1561,33 +1476,37 @@
             const tbody = document.getElementById('stockTableBody');
             tbody.innerHTML = '';
             if (!products.length) {
-                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:var(--gray);">Hakuna bidhaa</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:var(--gray);">Hakuna bidhaa</td></tr>';
                 return;
             }
+            const today = getTodayDateString();
             products.forEach((p, idx) => {
+                const purchasedToday = purchases
+                    .filter(record => record.productId === p.id && new Date(record.date).toDateString() === today)
+                    .reduce((sum, record) => sum + (record.qty || 0), 0);
+                const soldToday = transactions
+                    .filter(tx => new Date(tx.date).toDateString() === today)
+                    .reduce((sum, tx) => sum + tx.items.reduce((itemSum, item) => itemSum + (item.productId === p.id ? item.quantity : 0), 0), 0);
+                const remaining = p.stock || 0;
+                const openingStock = remaining + soldToday - purchasedToday;
+
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td>${idx+1}</td>
+                    <td>${idx + 1}</td>
                     <td>${p.name}</td>
                     <td>${p.category || ''}</td>
                     <td><strong>TSh ${p.price.toLocaleString()}</strong></td>
-                    <td>${p.stock ?? 0}</td>
-                    <td><button class="btn btn-outline" onclick="openAdjustStock(${p.id})">Adjust</button></td>
+                    <td>${openingStock}</td>
+                    <td>${purchasedToday}</td>
+                    <td>${soldToday}</td>
+                    <td>${remaining}</td>
                 `;
                 tbody.appendChild(tr);
             });
         }
 
-        function openAdjustStock(productId) {
-            const p = products.find(x => x.id === productId);
-            const qty = prompt('Enter stock adjustment (positive to add, negative to remove)', '0');
-            if (qty === null) return;
-            const n = parseInt(qty);
-            if (isNaN(n)) return showToast('Invalid quantity', 'error');
-            p.stock = (p.stock || 0) + n;
-            activityLog.push({ time: new Date().toLocaleTimeString(), user: currentUser ? currentUser.fullName : 'System', type: 'stock', action: `Adjusted ${p.name} by ${n}` });
-            renderStock(); renderProductsGrid(); renderProducts();
-            showToast('Stock updated', 'success');
+        function getTodayDateString() {
+            return new Date().toDateString();
         }
 
         function openPurchaseModal() {
@@ -1788,6 +1707,12 @@
             const vat = subtotal * 0.18;
             const grandTotal = subtotal + vat;
 
+            // populate payment methods select
+            const pmSelect = document.getElementById('paymentMethodSelect');
+            if (pmSelect) {
+                pmSelect.innerHTML = paymentMethods.map(m => `<option value="${m.id}">${m.name}</option>`).join('');
+            }
+
             if (cart.length === 0) {
                 container.innerHTML = '<p style="text-align:center; color:var(--gray); padding:20px 0;">Hakuna bidhaa kwenye risasi</p>';
             } else {
@@ -1853,6 +1778,10 @@
             });
 
             // Record transaction
+            const pmSelect = document.getElementById('paymentMethodSelect');
+            const selectedPmId = pmSelect ? parseInt(pmSelect.value) : null;
+            const selectedPm = paymentMethods.find(m => m.id === selectedPmId) || null;
+
             const transaction = {
                 id: nextId.transaction++,
                 items: [...cart],
@@ -1860,6 +1789,7 @@
                 total: total,
                 cashier: currentUser.fullName,
                 cashierId: currentUser.id,
+                paymentMethod: selectedPm ? selectedPm.name : null,
                 date: new Date().toISOString()
             };
             transactions.push(transaction);
@@ -1870,7 +1800,6 @@
             cart = [];
             renderCart();
             renderProductsGrid();
-            renderProducts();
             renderStock();
             updateDashboard();
             updateReport();
@@ -1912,47 +1841,78 @@
         }
 
         // ==================== REPORTS ====================
-        function updateReport() {
+        function getSelectedReportDate() {
+            const dateInput = document.getElementById('reportDateInput');
+            if (!dateInput || !dateInput.value) return null;
+            const date = new Date(dateInput.value);
+            return isNaN(date.getTime()) ? null : date.toDateString();
+        }
+
+        function handleReportDateChange() {
+            updateReport(getSelectedReportDate());
+        }
+
+        function updateReport(selectedDate = null) {
             const tbody = document.getElementById('reportTableBody');
-            if (transactions.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--gray);">Hakuna mauzo bado</td></tr>';
+            const reportDateInfo = document.getElementById('reportDateInfo');
+            const reportDate = selectedDate || getSelectedReportDate();
+            const filtered = reportDate
+                ? transactions.filter(t => new Date(t.date).toDateString() === reportDate)
+                : transactions;
+
+            if (reportDate) {
+                reportDateInfo.textContent = `Ripoti kwa ${new Date(reportDate).toLocaleDateString()}`;
+            } else {
+                reportDateInfo.textContent = 'Ripoti ya jumla ya mauzo yote.';
+            }
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--gray);">Hakuna mauzo ${reportDate ? 'kwa tarehe hiyo' : 'bado'}</td></tr>`;
                 return;
             }
 
-            tbody.innerHTML = transactions.slice().reverse().map(t => `
+            tbody.innerHTML = filtered.slice().reverse().map(t => `
                 <tr>
                     <td>${new Date(t.date).toLocaleDateString()} ${new Date(t.date).toLocaleTimeString()}</td>
                     <td>${t.cashier}</td>
                     <td>${t.items.reduce((sum, i) => sum + i.quantity, 0)}</td>
                     <td><strong>TSh ${t.total.toLocaleString()}</strong></td>
+                    <td>-</td>
                 </tr>
             `).join('');
         }
 
-        function generateReport() {
-            if (transactions.length === 0) {
+        function generateReport(dateToUse = null) {
+            const reportDate = dateToUse || getSelectedReportDate();
+            const filtered = reportDate
+                ? transactions.filter(t => new Date(t.date).toDateString() === reportDate)
+                : transactions;
+
+            if (filtered.length === 0) {
                 showToast('Hakuna mauzo ya kuweka kwenye ripoti', 'error');
                 return;
             }
 
-            const totalSales = transactions.reduce((sum, t) => sum + t.total, 0);
-            const totalItems = transactions.reduce((sum, t) => sum + t.items.reduce((s, i) => s + i.quantity, 0), 0);
+            const totalSales = filtered.reduce((sum, t) => sum + t.total, 0);
+            const totalItems = filtered.reduce((sum, t) => sum + t.items.reduce((s, i) => s + i.quantity, 0), 0);
+            const reportDateLabel = reportDate ? new Date(reportDate).toLocaleDateString() : 'Zote';
 
             const report = `
 ===================================
    SMART POS - RIPOTI YA MAUZO
 ===================================
 Tarehe: ${new Date().toLocaleDateString()}
+Ripoti kwa: ${reportDateLabel}
 Muda: ${new Date().toLocaleTimeString()}
 Imetolewa na: ${currentUser ? currentUser.fullName : 'System'}
 -----------------------------------
-Miamala Yote: ${transactions.length}
+Miamala: ${filtered.length}
 Bidhaa Zilizouzwa: ${totalItems}
 Jumla ya Mauzo: TSh ${totalSales.toLocaleString()}
 ===================================
 
 Orodha ya Miamala:
-${transactions.slice().reverse().map(t => `
+${filtered.slice().reverse().map(t => `
 [${new Date(t.date).toLocaleDateString()} ${new Date(t.date).toLocaleTimeString()}]
    Mhudumu: ${t.cashier}
    Bidhaa: ${t.items.map(i => `${i.icon} ${i.name} ×${i.quantity}`).join(', ')}
@@ -2091,11 +2051,11 @@ ${transactions.slice().reverse().map(t => `
             el.innerHTML = `
                 <div class="table-container">
                     <table>
-                        <thead><tr><th>Tarehe</th><th>Bidhaa</th><th>Kiasi</th><th>Bei</th><th>Jumla</th></tr></thead>
+                        <thead><tr><th>Tarehe</th><th>Bidhaa</th><th>Kiasi</th><th>Bei</th><th>Jumla</th><th>Vitendo</th></tr></thead>
                         <tbody>
                             ${purchases.slice().reverse().map(p => {
                                 const prod = products.find(x => x.id === p.productId) || { name: '-' };
-                                return `<tr><td>${new Date(p.date).toLocaleString()}</td><td>${prod.name}</td><td>${p.qty}</td><td>${formatMoney(p.price)}</td><td>${formatMoney((p.price||0)*(p.qty||0))}</td></tr>`;
+                                return `<tr><td>${new Date(p.date).toLocaleString()}</td><td>${prod.name}</td><td>${p.qty}</td><td>${formatMoney(p.price)}</td><td>${formatMoney((p.price||0)*(p.qty||0))}</td><td><button class="btn btn-sm btn-primary" onclick="editPurchase(${p.id})">✏️</button> <button class="btn btn-sm btn-danger" onclick="deletePurchase(${p.id})">🗑️</button></td></tr>`;
                             }).join('')}
                         </tbody>
                     </table>
@@ -2120,9 +2080,9 @@ ${transactions.slice().reverse().map(t => `
             el.innerHTML = `
                 <div class="table-container">
                     <table>
-                        <thead><tr><th>Tarehe</th><th>Maelezo</th><th>Category</th><th>Kiasi</th></tr></thead>
+                        <thead><tr><th>Tarehe</th><th>Maelezo</th><th>Category</th><th>Kiasi</th><th>Vitendo</th></tr></thead>
                         <tbody>
-                            ${expenses.slice().reverse().map(e => `<tr><td>${new Date(e.date).toLocaleString()}</td><td>${e.desc}</td><td>${e.category || 'N/A'}</td><td>${formatMoney(e.amount)}</td></tr>`).join('')}
+                            ${expenses.slice().reverse().map(e => `<tr><td>${new Date(e.date).toLocaleString()}</td><td>${e.desc}</td><td>${e.category || 'N/A'}</td><td>${formatMoney(e.amount)}</td><td><button class="btn btn-sm btn-primary" onclick="editExpense(${e.id})">✏️</button> <button class="btn btn-sm btn-danger" onclick="deleteExpense(${e.id})">🗑️</button></td></tr>`).join('')}
                         </tbody>
                     </table>
                 </div>
