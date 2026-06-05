@@ -1017,6 +1017,25 @@
                         </table>
                     </div>
                 </div>
+
+                <!-- Financial Reports -->
+                <div class="card" style="margin-top:16px;">
+                    <h3 style="margin-bottom:12px;">Financial Statements</h3>
+                    <div style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:12px;">
+                        <button class="btn btn-outline" onclick="renderIncomeStatement()">Income Statement</button>
+                        <button class="btn btn-outline" onclick="renderBalanceSheet()">Balance Sheet</button>
+                        <button class="btn btn-outline" onclick="renderCashFlow()">Cash Flow</button>
+                        <button class="btn btn-outline" onclick="renderPurchasesReport()">Purchases Report</button>
+                        <button class="btn btn-outline" onclick="renderExpensesReport()">Expenses Report</button>
+                    </div>
+                    <div id="financialReportsContainer">
+                        <div id="incomeStatementSection" style="display:none; margin-top:12px;"></div>
+                        <div id="balanceSheetSection" style="display:none; margin-top:12px;"></div>
+                        <div id="cashFlowSection" style="display:none; margin-top:12px;"></div>
+                        <div id="purchasesReportSection" style="display:none; margin-top:12px;"></div>
+                        <div id="expensesReportSection" style="display:none; margin-top:12px;"></div>
+                    </div>
+                </div>
             </div>
 
             <!-- Stock -->
@@ -1878,6 +1897,220 @@ ${transactions.slice().reverse().map(t => `
             URL.revokeObjectURL(url);
 
             showToast('Ripoti imeshatengenezwa!');
+        }
+
+        // ==================== FINANCIAL REPORTS ====================
+        function formatMoney(n){ return 'TSh ' + (n||0).toLocaleString(); }
+
+        function computeAverageCost(productId){
+            const recs = purchases.filter(p => p.productId === productId);
+            const totalQty = recs.reduce((s,r) => s + (r.qty||0), 0);
+            const totalCost = recs.reduce((s,r) => s + ((r.price||0) * (r.qty||0)), 0);
+            if (totalQty > 0) return totalCost / totalQty;
+            const prod = products.find(p => p.id === productId);
+            return prod ? prod.price : 0;
+        }
+
+        function renderIncomeStatement(){
+            const totalRevenue = transactions.reduce((s,t) => s + (t.total||0), 0);
+            let totalCOGS = 0;
+            transactions.forEach(t => { t.items.forEach(i => { totalCOGS += computeAverageCost(i.productId) * i.quantity; }); });
+            const totalExpenses = expenses.reduce((s,e) => s + (e.amount||0), 0);
+            const grossProfit = totalRevenue - totalCOGS;
+            const netIncome = grossProfit - totalExpenses;
+
+            const el = document.getElementById('incomeStatementSection');
+            el.style.display = 'block';
+            document.getElementById('balanceSheetSection').style.display = 'none';
+            document.getElementById('cashFlowSection').style.display = 'none';
+            document.getElementById('purchasesReportSection').style.display = 'none';
+            document.getElementById('expensesReportSection').style.display = 'none';
+
+            el.innerHTML = `
+                <h4>Income Statement</h4>
+                <div class="table-container">
+                    <table>
+                        <tr><th>Revenue</th><td>${formatMoney(totalRevenue)}</td></tr>
+                        <tr><th>Cost of Goods Sold (COGS)</th><td>${formatMoney(totalCOGS)}</td></tr>
+                        <tr><th>Gross Profit</th><td>${formatMoney(grossProfit)}</td></tr>
+                        <tr><th>Expenses</th><td>${formatMoney(totalExpenses)}</td></tr>
+                        <tr><th>Net Income</th><td><strong>${formatMoney(netIncome)}</strong></td></tr>
+                    </table>
+                </div>
+                <div style="margin-top:12px;"><button class="btn btn-primary" onclick="generateIncomeStatement()">Download Income Statement</button></div>
+            `;
+        }
+
+        function renderBalanceSheet(){
+            const inventoryValue = products.reduce((s,p) => {
+                const avg = computeAverageCost(p.id);
+                return s + ((p.stock||0) * avg);
+            }, 0);
+            const inflows = transactions.reduce((s,t) => s + (t.total||0), 0);
+            const purchasesTotal = purchases.reduce((s,p) => s + ((p.price||0) * (p.qty||0)), 0);
+            const expensesTotal = expenses.reduce((s,e) => s + (e.amount||0), 0);
+            const cash = inflows - (purchasesTotal + expensesTotal);
+            const liabilities = 0;
+            const equity = cash + inventoryValue - liabilities;
+
+            const el = document.getElementById('balanceSheetSection');
+            el.style.display = 'block';
+            document.getElementById('incomeStatementSection').style.display = 'none';
+            document.getElementById('cashFlowSection').style.display = 'none';
+            document.getElementById('purchasesReportSection').style.display = 'none';
+            document.getElementById('expensesReportSection').style.display = 'none';
+
+            el.innerHTML = `
+                <h4>Balance Sheet (Simplified)</h4>
+                <div class="table-container">
+                    <table>
+                        <tr><th>Assets - Cash</th><td>${formatMoney(cash)}</td></tr>
+                        <tr><th>Assets - Inventory</th><td>${formatMoney(inventoryValue)}</td></tr>
+                        <tr><th>Total Assets</th><td>${formatMoney(cash + inventoryValue)}</td></tr>
+                        <tr><th>Liabilities</th><td>${formatMoney(liabilities)}</td></tr>
+                        <tr><th>Equity</th><td>${formatMoney(equity)}</td></tr>
+                    </table>
+                </div>
+                <div style="margin-top:12px;"><button class="btn btn-primary" onclick="generateBalanceSheet()">Download Balance Sheet</button></div>
+            `;
+        }
+
+        function renderCashFlow(){
+            const inflows = transactions.reduce((s,t) => s + (t.total||0), 0);
+            const purchasesTotal = purchases.reduce((s,p) => s + ((p.price||0) * (p.qty||0)), 0);
+            const expensesTotal = expenses.reduce((s,e) => s + (e.amount||0), 0);
+            const net = inflows - (purchasesTotal + expensesTotal);
+
+            const el = document.getElementById('cashFlowSection');
+            el.style.display = 'block';
+            document.getElementById('incomeStatementSection').style.display = 'none';
+            document.getElementById('balanceSheetSection').style.display = 'none';
+            document.getElementById('purchasesReportSection').style.display = 'none';
+            document.getElementById('expensesReportSection').style.display = 'none';
+
+            el.innerHTML = `
+                <h4>Cash Flow Statement (Simplified)</h4>
+                <div class="table-container">
+                    <table>
+                        <tr><th>Cash Inflows (Sales)</th><td>${formatMoney(inflows)}</td></tr>
+                        <tr><th>Cash Outflows - Purchases</th><td>${formatMoney(purchasesTotal)}</td></tr>
+                        <tr><th>Cash Outflows - Expenses</th><td>${formatMoney(expensesTotal)}</td></tr>
+                        <tr><th>Net Cash Flow</th><td><strong>${formatMoney(net)}</strong></td></tr>
+                    </table>
+                </div>
+                <div style="margin-top:12px;"><button class="btn btn-primary" onclick="generateCashFlow()">Download Cash Flow</button></div>
+            `;
+        }
+
+        function renderPurchasesReport(){
+            const el = document.getElementById('purchasesReportSection');
+            el.style.display = 'block';
+            document.getElementById('incomeStatementSection').style.display = 'none';
+            document.getElementById('balanceSheetSection').style.display = 'none';
+            document.getElementById('cashFlowSection').style.display = 'none';
+            document.getElementById('expensesReportSection').style.display = 'none';
+
+            if (!purchases.length) {
+                el.innerHTML = '<p style="color:var(--gray)">Hakuna manunuzi</p>';
+                return;
+            }
+
+            el.innerHTML = `
+                <div class="table-container">
+                    <table>
+                        <thead><tr><th>Tarehe</th><th>Bidhaa</th><th>Kiasi</th><th>Bei</th><th>Jumla</th></tr></thead>
+                        <tbody>
+                            ${purchases.slice().reverse().map(p => {
+                                const prod = products.find(x => x.id === p.productId) || { name: '-' };
+                                return `<tr><td>${new Date(p.date).toLocaleString()}</td><td>${prod.name}</td><td>${p.qty}</td><td>${formatMoney(p.price)}</td><td>${formatMoney((p.price||0)*(p.qty||0))}</td></tr>`;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                </div>
+                <div style="margin-top:12px;"><button class="btn btn-primary" onclick="generatePurchasesReport()">Download Purchases Report</button></div>
+            `;
+        }
+
+        function renderExpensesReport(){
+            const el = document.getElementById('expensesReportSection');
+            el.style.display = 'block';
+            document.getElementById('incomeStatementSection').style.display = 'none';
+            document.getElementById('balanceSheetSection').style.display = 'none';
+            document.getElementById('cashFlowSection').style.display = 'none';
+            document.getElementById('purchasesReportSection').style.display = 'none';
+
+            if (!expenses.length) {
+                el.innerHTML = '<p style="color:var(--gray)">Hakuna gharama</p>';
+                return;
+            }
+
+            el.innerHTML = `
+                <div class="table-container">
+                    <table>
+                        <thead><tr><th>Tarehe</th><th>Maelezo</th><th>Kiasi</th></tr></thead>
+                        <tbody>
+                            ${expenses.slice().reverse().map(e => `<tr><td>${new Date(e.date).toLocaleString()}</td><td>${e.desc}</td><td>${formatMoney(e.amount)}</td></tr>`).join('')}
+                        </tbody>
+                    </table>
+                </div>
+                <div style="margin-top:12px;"><button class="btn btn-primary" onclick="generateExpensesReport()">Download Expenses Report</button></div>
+            `;
+        }
+
+        function generateIncomeStatement(){
+            const totalRevenue = transactions.reduce((s,t) => s + (t.total||0), 0);
+            let totalCOGS = 0;
+            transactions.forEach(t => { t.items.forEach(i => { totalCOGS += computeAverageCost(i.productId) * i.quantity; }); });
+            const totalExpenses = expenses.reduce((s,e) => s + (e.amount||0), 0);
+            const grossProfit = totalRevenue - totalCOGS;
+            const netIncome = grossProfit - totalExpenses;
+            const report = `Income Statement\nDate: ${new Date().toLocaleString()}\n\nRevenue: ${formatMoney(totalRevenue)}\nCOGS: ${formatMoney(totalCOGS)}\nGross Profit: ${formatMoney(grossProfit)}\nExpenses: ${formatMoney(totalExpenses)}\nNet Income: ${formatMoney(netIncome)}\n`;
+            const blob = new Blob([report], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url; a.download = `Income_Statement_${new Date().toISOString().slice(0,10)}.txt`; a.click(); URL.revokeObjectURL(url);
+            showToast('Income statement downloaded');
+        }
+
+        function generateBalanceSheet(){
+            const inventoryValue = products.reduce((s,p) => s + ((p.stock||0) * computeAverageCost(p.id)), 0);
+            const inflows = transactions.reduce((s,t) => s + (t.total||0), 0);
+            const purchasesTotal = purchases.reduce((s,p) => s + ((p.price||0) * (p.qty||0)), 0);
+            const expensesTotal = expenses.reduce((s,e) => s + (e.amount||0), 0);
+            const cash = inflows - (purchasesTotal + expensesTotal);
+            const liabilities = 0; const equity = cash + inventoryValue - liabilities;
+
+            const report = `Balance Sheet\nDate: ${new Date().toLocaleString()}\n\nCash: ${formatMoney(cash)}\nInventory: ${formatMoney(inventoryValue)}\nTotal Assets: ${formatMoney(cash+inventoryValue)}\nLiabilities: ${formatMoney(liabilities)}\nEquity: ${formatMoney(equity)}\n`;
+            const blob = new Blob([report], { type: 'text/plain' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `Balance_Sheet_${new Date().toISOString().slice(0,10)}.txt`; a.click(); URL.revokeObjectURL(url);
+            showToast('Balance sheet downloaded');
+        }
+
+        function generateCashFlow(){
+            const inflows = transactions.reduce((s,t) => s + (t.total||0), 0);
+            const purchasesTotal = purchases.reduce((s,p) => s + ((p.price||0) * (p.qty||0)), 0);
+            const expensesTotal = expenses.reduce((s,e) => s + (e.amount||0), 0);
+            const net = inflows - (purchasesTotal + expensesTotal);
+            const report = `Cash Flow\nDate: ${new Date().toLocaleString()}\n\nInflows (Sales): ${formatMoney(inflows)}\nOutflows (Purchases): ${formatMoney(purchasesTotal)}\nOutflows (Expenses): ${formatMoney(expensesTotal)}\nNet Cash Flow: ${formatMoney(net)}\n`;
+            const blob = new Blob([report], { type: 'text/plain' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `Cash_Flow_${new Date().toISOString().slice(0,10)}.txt`; a.click(); URL.revokeObjectURL(url);
+            showToast('Cash flow downloaded');
+        }
+
+        function generatePurchasesReport(){
+            if (!purchases.length) return showToast('Hakuna manunuzi', 'error');
+            const rows = purchases.slice().reverse().map(p => {
+                const prod = products.find(x => x.id === p.productId) || { name: '-' };
+                return `${new Date(p.date).toLocaleString()} | ${prod.name} | ${p.qty} | ${formatMoney(p.price)} | ${formatMoney((p.price||0)*(p.qty||0))}`;
+            }).join('\n');
+            const report = `Purchases Report\nDate: ${new Date().toLocaleString()}\n\n${rows}`;
+            const blob = new Blob([report], { type: 'text/plain' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `Purchases_Report_${new Date().toISOString().slice(0,10)}.txt`; a.click(); URL.revokeObjectURL(url);
+            showToast('Purchases report downloaded');
+        }
+
+        function generateExpensesReport(){
+            if (!expenses.length) return showToast('Hakuna gharama', 'error');
+            const rows = expenses.slice().reverse().map(e => `${new Date(e.date).toLocaleString()} | ${e.desc} | ${formatMoney(e.amount)}`).join('\n');
+            const report = `Expenses Report\nDate: ${new Date().toLocaleString()}\n\n${rows}`;
+            const blob = new Blob([report], { type: 'text/plain' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `Expenses_Report_${new Date().toISOString().slice(0,10)}.txt`; a.click(); URL.revokeObjectURL(url);
+            showToast('Expenses report downloaded');
         }
 
         // ==================== INITIAL SETUP ====================
