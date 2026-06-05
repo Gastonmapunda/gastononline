@@ -403,6 +403,32 @@
             transition: transform 0.25s ease, opacity 0.25s ease;
         }
 
+        .top-navbar-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .menu-button {
+            width: 44px;
+            height: 44px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            border-radius: 12px;
+            background: var(--primary);
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            transition: background 0.2s ease;
+        }
+
+        .menu-button:hover {
+            background: var(--primary-dark);
+        }
+
         .top-navbar.hidden {
             transform: translateY(-120%);
             opacity: 0;
@@ -997,7 +1023,10 @@
         <!-- Main Content -->
         <div class="main-content">
             <div class="top-navbar">
-                <div class="system-title">Smart<span>POS</span> Mfumo</div>
+                <div class="top-navbar-left">
+                    <button class="menu-button" onclick="toggleSidebar()">☰</button>
+                    <div class="system-title">Smart<span>POS</span> Mfumo</div>
+                </div>
                 <div class="top-nav-actions">
                     <div class="nav-tabs">
                         <button class="nav-button" data-page="dashboard" onclick="showPage('dashboard')">🏠 Home</button>
@@ -1529,6 +1558,7 @@
             if (menuItem) menuItem.classList.add('active');
             setActiveDashboardTab(page);
             setActiveTopNav(page);
+            window.scrollTo(0, 0);
             if (page !== 'dashboard') {
                 hideTopNavbar();
             } else {
