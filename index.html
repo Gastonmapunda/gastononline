@@ -1102,20 +1102,28 @@
                         <h2>Expenses</h2>
                         <p class="subtitle">Rekodi gharama za biashara</p>
                     </div>
-                    <button class="btn btn-primary" onclick="openExpenseModal()">➕ New Expense</button>
+                    <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                        <button class="btn btn-primary" onclick="openExpenseModal()">➕ New Expense</button>
+                        <button class="btn btn-outline" onclick="openCategoryModal()">➕ Add Category</button>
+                    </div>
                 </div>
                 <div class="card">
+                    <div style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:16px;">
+                        <button class="category-tab active" onclick="setExpenseCategoryFilter('all')">Zote</button>
+                        <div id="expenseCategoryFilters"></div>
+                    </div>
                     <div class="table-container">
                         <table>
                             <thead>
                                 <tr>
                                     <th>Tarehe</th>
                                     <th>Maelezo</th>
+                                    <th>Category</th>
                                     <th>Kiasi</th>
                                 </tr>
                             </thead>
                             <tbody id="expensesTableBody">
-                                <tr><td colspan="3" style="text-align:center; color:var(--gray);">Hakuna gharama</td></tr>
+                                <tr><td colspan="4" style="text-align:center; color:var(--gray);">Hakuna gharama</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -1263,11 +1271,32 @@
                     <input type="text" id="expenseDesc" required>
                 </div>
                 <div class="form-group">
+                    <label>Familia ya Gharama</label>
+                    <select id="expenseCategory" required></select>
+                </div>
+                <div class="form-group">
                     <label>Kiasi (TSh)</label>
                     <input type="number" id="expenseAmount" required min="0">
                 </div>
                 <div class="modal-actions">
                     <button type="button" class="btn btn-outline" onclick="closeModal('expenseModal')">Ghairi</button>
+                    <button type="submit" class="btn btn-primary">Hifadhi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Category Modal -->
+    <div class="modal-overlay" id="categoryModal">
+        <div class="modal">
+            <h3>Add Expense Category</h3>
+            <form id="categoryForm">
+                <div class="form-group">
+                    <label>Category Name</label>
+                    <input type="text" id="categoryName" placeholder="Mf: Utilities" required>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-outline" onclick="closeModal('categoryModal')">Ghairi</button>
                     <button type="submit" class="btn btn-primary">Hifadhi</button>
                 </div>
             </form>
@@ -1294,7 +1323,9 @@
 
         let transactions = [];
         let purchases = []; // {id, date, userId, productId, qty, price}
-        let expenses = []; // {id, date, userId, desc, amount}
+        let expenses = []; // {id, date, userId, desc, amount, category}
+        let expenseCategories = ['Utilities', 'Rent', 'Salaries', 'Supplies', 'Advertising'];
+        let expenseCategoryFilter = 'all';
         let activityLog = [];
         let currentUser = null;
         let cart = [];
@@ -1361,6 +1392,7 @@
             renderStock();
             renderPurchases();
             renderExpenses();
+            renderExpenseCategories();
             updateReport();
         }
 
@@ -1574,7 +1606,13 @@
         function openExpenseModal() {
             document.getElementById('expenseDesc').value = '';
             document.getElementById('expenseAmount').value = 0;
+            populateExpenseCategorySelect();
             document.getElementById('expenseModal').classList.add('active');
+        }
+
+        function openCategoryModal() {
+            document.getElementById('categoryName').value = '';
+            document.getElementById('categoryModal').classList.add('active');
         }
 
         document.getElementById('purchaseForm').addEventListener('submit', function(e){
@@ -1596,13 +1634,47 @@
             e.preventDefault();
             const desc = document.getElementById('expenseDesc').value.trim();
             const amount = parseFloat(document.getElementById('expenseAmount').value);
+            const category = document.getElementById('expenseCategory').value;
             const id = expenses.length + 1;
-            expenses.push({ id, date: new Date().toISOString(), userId: currentUser ? currentUser.id : null, desc, amount });
-            activityLog.unshift({ time: new Date().toLocaleTimeString(), user: currentUser ? currentUser.fullName : 'System', type: 'expense', action: `Expense: ${desc} ${amount}` });
+            expenses.push({ id, date: new Date().toISOString(), userId: currentUser ? currentUser.id : null, desc, amount, category });
+            activityLog.unshift({ time: new Date().toLocaleTimeString(), user: currentUser ? currentUser.fullName : 'System', type: 'expense', action: `Expense: ${desc} ${amount} (${category})` });
             document.getElementById('expenseModal').classList.remove('active');
             renderExpenses(); updateReport();
             showToast('Expense recorded', 'success');
         });
+
+        document.getElementById('categoryForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const name = document.getElementById('categoryName').value.trim();
+            if (!name) return showToast('Ingiza jina la category', 'error');
+            if (expenseCategories.includes(name)) return showToast('Category tayari ipo', 'error');
+            expenseCategories.push(name);
+            document.getElementById('categoryModal').classList.remove('active');
+            renderExpenseCategories();
+            showToast('Category imeongezwa', 'success');
+        });
+
+        function populateExpenseCategorySelect() {
+            const select = document.getElementById('expenseCategory');
+            select.innerHTML = expenseCategories.map(cat => `<option value="${cat}">${cat}</option>`).join('');
+        }
+
+        function renderExpenseCategories() {
+            const container = document.getElementById('expenseCategoryFilters');
+            container.innerHTML = expenseCategories.map(cat => `
+                <button class="category-tab ${expenseCategoryFilter === cat ? 'active' : ''}" onclick="setExpenseCategoryFilter('${cat}')">${cat}</button>
+            `).join('');
+        }
+
+        function setExpenseCategoryFilter(category) {
+            expenseCategoryFilter = category;
+            document.querySelectorAll('#page-expenses .category-tab').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('#page-expenses .category-tab').forEach(btn => {
+                if (btn.textContent === category) btn.classList.add('active');
+                if (category === 'all' && btn.textContent === 'Zote') btn.classList.add('active');
+            });
+            renderExpenses();
+        }
 
         function renderPurchases() {
             const tbody = document.getElementById('purchasesTableBody');
@@ -1622,13 +1694,14 @@
         function renderExpenses() {
             const tbody = document.getElementById('expensesTableBody');
             tbody.innerHTML = '';
-            if (!expenses.length) {
-                tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:var(--gray);">Hakuna gharama</td></tr>';
+            const filtered = expenseCategoryFilter === 'all' ? expenses : expenses.filter(e => e.category === expenseCategoryFilter);
+            if (!filtered.length) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--gray);">Hakuna gharama</td></tr>';
                 return;
             }
-            expenses.slice().reverse().forEach(r => {
+            filtered.slice().reverse().forEach(r => {
                 const tr = document.createElement('tr');
-                tr.innerHTML = `<td>${new Date(r.date).toLocaleString()}</td><td>${r.desc}</td><td>TSh ${r.amount.toLocaleString()}</td>`;
+                tr.innerHTML = `<td>${new Date(r.date).toLocaleString()}</td><td>${r.desc}</td><td>${r.category || 'N/A'}</td><td>TSh ${r.amount.toLocaleString()}</td>`;
                 tbody.appendChild(tr);
             });
         }
@@ -2047,9 +2120,9 @@ ${transactions.slice().reverse().map(t => `
             el.innerHTML = `
                 <div class="table-container">
                     <table>
-                        <thead><tr><th>Tarehe</th><th>Maelezo</th><th>Kiasi</th></tr></thead>
+                        <thead><tr><th>Tarehe</th><th>Maelezo</th><th>Category</th><th>Kiasi</th></tr></thead>
                         <tbody>
-                            ${expenses.slice().reverse().map(e => `<tr><td>${new Date(e.date).toLocaleString()}</td><td>${e.desc}</td><td>${formatMoney(e.amount)}</td></tr>`).join('')}
+                            ${expenses.slice().reverse().map(e => `<tr><td>${new Date(e.date).toLocaleString()}</td><td>${e.desc}</td><td>${e.category || 'N/A'}</td><td>${formatMoney(e.amount)}</td></tr>`).join('')}
                         </tbody>
                     </table>
                 </div>
@@ -2120,6 +2193,7 @@ ${transactions.slice().reverse().map(t => `
             renderStock();
             renderPurchases();
             renderExpenses();
+            renderExpenseCategories();
             updateReport();
         });
     </script>
