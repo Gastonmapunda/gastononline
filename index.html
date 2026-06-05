@@ -357,6 +357,66 @@
             display: block;
         }
 
+        .top-navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 16px 20px;
+            margin-bottom: 24px;
+            position: sticky;
+            top: 0;
+            z-index: 40;
+        }
+
+        .system-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .system-title span {
+            color: var(--primary);
+        }
+
+        .top-nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .nav-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .nav-button {
+            padding: 10px 14px;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            background: var(--light);
+            color: var(--dark);
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .nav-button.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .nav-button:hover {
+            transform: translateY(-1px);
+            border-color: var(--primary);
+        }
+
         /* Cards */
         .card {
             background: white;
@@ -864,6 +924,22 @@
 
         <!-- Main Content -->
         <div class="main-content">
+            <div class="top-navbar">
+                <div class="system-title">Smart<span>POS</span> Mfumo</div>
+                <div class="top-nav-actions">
+                    <div class="nav-tabs">
+                        <button class="nav-button active" data-page="dashboard" onclick="showPage('dashboard')">🏠 Home</button>
+                        <button class="nav-button" data-page="stock" onclick="showPage('stock')">📚 Stock</button>
+                        <button class="nav-button" data-page="purchases" onclick="showPage('purchases')">📥 Purchases</button>
+                        <button class="nav-button" data-page="expenses" onclick="showPage('expenses')">💸 Expenses</button>
+                        <button class="nav-button" data-page="users" onclick="showPage('users')">👥 Watumiaji</button>
+                        <button class="nav-button" data-page="reports" onclick="showPage('reports')">📈 Ripoti</button>
+                        <button class="nav-button" data-page="settings" onclick="showPage('settings')">⚙️ Settings</button>
+                    </div>
+                    <button class="btn btn-primary btn-sm" onclick="toggleSidebar()">☰ Menu</button>
+                </div>
+            </div>
+
             <!-- Dashboard -->
             <div class="page active" id="page-dashboard">
                 <div class="page-header">
@@ -1115,7 +1191,8 @@
                                 </tr>
                             </thead>
                             <tbody id="purchasesTableBody">
-                                <tr><td colspan="6" style="text-align:center; color:var(--gray);">Hakuna manunuzi</td></tr>
+                                <tr><td colspaon" data-page="pos" onclick="showPage('pos')">🛒 POS</button>
+                        <button class="nav-buttn="6" style="text-align:center; color:var(--gray);">Hakuna manunuzi</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -1387,12 +1464,25 @@
             const menuItem = document.querySelector(`.menu-item[data-page="${page}"]`);
             if (menuItem) menuItem.classList.add('active');
             setActiveDashboardTab(page);
+            setActiveTopNav(page);
         }
 
         function setActiveDashboardTab(page) {
             document.querySelectorAll('.dashboard-tab').forEach(tab => {
                 tab.classList.toggle('active', tab.dataset.tab === page);
             });
+        }
+
+        function setActiveTopNav(page) {
+            document.querySelectorAll('.nav-button').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.page === page);
+            });
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            if (!sidebar) return;
+            sidebar.style.display = sidebar.style.display === 'none' ? 'flex' : 'none';
         }
 
         // ==================== INITIALIZATION ====================
