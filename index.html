@@ -155,14 +155,44 @@
             font-size: 13px;
         }
 
+        /* Header Bar */
+        .app-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 70px;
+            background: linear-gradient(135deg, #1a73e8 0%, #1557b0 100%);
+            display: flex;
+            align-items: center;
+            padding: 0 24px;
+            z-index: 110;
+            box-shadow: 0 4px 12px rgba(26, 115, 232, 0.2);
+        }
+
+        .app-header-brand {
+            font-size: 24px;
+            font-weight: 800;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .app-header-brand span {
+            color: #4a9eff;
+        }
+
         /* Main App Layout */
         .app-container {
             display: none;
             min-height: 100vh;
+            padding-top: 70px;
         }
 
         .app-container.active {
             display: flex;
+            flex-direction: column;
         }
 
         /* Sidebar */
@@ -175,7 +205,7 @@
             flex-direction: column;
             flex-shrink: 0;
             position: fixed;
-            top: 0;
+            top: 70px;
             left: 0;
             bottom: 0;
             z-index: 100;
@@ -859,6 +889,9 @@
             .stats-grid {
                 grid-template-columns: 1fr 1fr;
             }
+            .app-header-brand {
+                font-size: 20px;
+            }
         }
 
         @media (max-width: 600px) {
@@ -874,6 +907,9 @@
             }
             .modal {
                 padding: 20px;
+            }
+            .app-header-brand {
+                font-size: 18px;
             }
         }
     </style>
@@ -905,6 +941,13 @@
 
     <!-- Toast -->
     <div class="toast" id="toast"></div>
+
+    <!-- App Header -->
+    <div class="app-header" id="appHeader" style="display: none;">
+        <div class="app-header-brand">
+            Smart<span>POS</span>
+        </div>
+    </div>
 
     <!-- Main App -->
     <div class="app-container" id="appContainer">
@@ -1445,6 +1488,7 @@
                 currentUser = user;
                 document.getElementById('loginScreen').classList.add('hidden');
                 document.getElementById('appContainer').classList.add('active');
+                document.getElementById('appHeader').style.display = 'flex';
                 document.getElementById('userAvatar').textContent = user.fullName.charAt(0).toUpperCase();
                 document.getElementById('userName').textContent = user.fullName;
                 document.getElementById('userRole').textContent = user.role.charAt(0).toUpperCase() + user.role.slice(1);
