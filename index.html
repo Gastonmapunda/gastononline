@@ -796,6 +796,15 @@
                 <div class="menu-item" data-page="pos" onclick="showPage('pos')">
                     <span class="icon">🛒</span> POS (Mauzo)
                 </div>
+                <div class="menu-item" data-page="stock" onclick="showPage('stock')">
+                    <span class="icon">📚</span> Stock
+                </div>
+                <div class="menu-item" data-page="purchases" onclick="showPage('purchases')">
+                    <span class="icon">📥</span> Purchases
+                </div>
+                <div class="menu-item" data-page="expenses" onclick="showPage('expenses')">
+                    <span class="icon">💸</span> Expenses
+                </div>
                 <div class="menu-item" data-page="users" onclick="showPage('users')" id="usersMenu">
                     <span class="icon">👥</span> Watumiaji
                 </div>
@@ -804,6 +813,9 @@
                 </div>
                 <div class="menu-item" data-page="reports" onclick="showPage('reports')">
                     <span class="icon">📈</span> Ripoti
+                </div>
+                <div class="menu-item" data-page="settings" onclick="showPage('settings')" id="settingsMenu">
+                    <span class="icon">⚙️</span> Settings
                 </div>
             </div>
             <div class="sidebar-footer">
@@ -1006,6 +1018,106 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Stock -->
+            <div class="page" id="page-stock">
+                <div class="page-header">
+                    <div>
+                        <h2>Stock</h2>
+                        <p class="subtitle">Orodha na usimamizi wa hesabu</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="openProductModal()">➕ Bidhaa Mpya</button>
+                </div>
+                <div class="card">
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Jina</th>
+                                    <th>Aina</th>
+                                    <th>Bei</th>
+                                    <th>Hesabu</th>
+                                    <th>Vitendo</th>
+                                </tr>
+                            </thead>
+                            <tbody id="stockTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Purchases -->
+            <div class="page" id="page-purchases">
+                <div class="page-header">
+                    <div>
+                        <h2>Purchases</h2>
+                        <p class="subtitle">Rekodi manunuzi kutoka kwa wauzaji</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="openPurchaseModal()">➕ New Purchase</button>
+                </div>
+                <div class="card">
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Tarehe</th>
+                                    <th>Mtumiaji</th>
+                                    <th>Bidhaa</th>
+                                    <th>Kiasi</th>
+                                    <th>Bei</th>
+                                </tr>
+                            </thead>
+                            <tbody id="purchasesTableBody">
+                                <tr><td colspan="5" style="text-align:center; color:var(--gray);">Hakuna manunuzi</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Expenses -->
+            <div class="page" id="page-expenses">
+                <div class="page-header">
+                    <div>
+                        <h2>Expenses</h2>
+                        <p class="subtitle">Rekodi gharama za biashara</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="openExpenseModal()">➕ New Expense</button>
+                </div>
+                <div class="card">
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Tarehe</th>
+                                    <th>Maelezo</th>
+                                    <th>Kiasi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="expensesTableBody">
+                                <tr><td colspan="3" style="text-align:center; color:var(--gray);">Hakuna gharama</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings (admin only) -->
+            <div class="page" id="page-settings">
+                <div class="page-header">
+                    <div>
+                        <h2>Settings</h2>
+                        <p class="subtitle">Mazingira ya mfumo na usimamizi wa watumiaji</p>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>Site</h3>
+                    <div style="margin-bottom:16px;">Repo: <a href="https://github.com/Gastonmapunda/gastononline" target="_blank">Gastonmapunda/gastononline</a></div>
+                    <h3>Manage Users</h3>
+                    <p>Use the <strong>Watumiaji</strong> page to assign roles and manage users. Only admins can access this page.</p>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -1097,6 +1209,52 @@
         </div>
     </div>
 
+    <!-- Purchase Modal -->
+    <div class="modal-overlay" id="purchaseModal">
+        <div class="modal">
+            <h3>New Purchase</h3>
+            <form id="purchaseForm">
+                <div class="form-group">
+                    <label>Bidhaa</label>
+                    <select id="purchaseProduct"></select>
+                </div>
+                <div class="form-group">
+                    <label>Kiasi</label>
+                    <input type="number" id="purchaseQty" required min="1">
+                </div>
+                <div class="form-group">
+                    <label>Bei (TSh)</label>
+                    <input type="number" id="purchasePrice" required min="0">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-outline" onclick="closeModal('purchaseModal')">Ghairi</button>
+                    <button type="submit" class="btn btn-primary">Hifadhi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Expense Modal -->
+    <div class="modal-overlay" id="expenseModal">
+        <div class="modal">
+            <h3>New Expense</h3>
+            <form id="expenseForm">
+                <div class="form-group">
+                    <label>Maelezo</label>
+                    <input type="text" id="expenseDesc" required>
+                </div>
+                <div class="form-group">
+                    <label>Kiasi (TSh)</label>
+                    <input type="number" id="expenseAmount" required min="0">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-outline" onclick="closeModal('expenseModal')">Ghairi</button>
+                    <button type="submit" class="btn btn-primary">Hifadhi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         // ==================== DATA STORE ====================
         let users = [
@@ -1116,6 +1274,8 @@
         ];
 
         let transactions = [];
+        let purchases = []; // {id, date, userId, productId, qty, price}
+        let expenses = []; // {id, date, userId, desc, amount}
         let activityLog = [];
         let currentUser = null;
         let cart = [];
@@ -1140,8 +1300,10 @@
                 // Hide admin-only menus for non-admin users
                 if (user.role !== 'admin') {
                     document.getElementById('usersMenu').style.display = 'none';
+                    document.getElementById('settingsMenu').style.display = 'none';
                 } else {
                     document.getElementById('usersMenu').style.display = 'flex';
+                    document.getElementById('settingsMenu').style.display = 'flex';
                 }
 
                 initApp();
@@ -1177,6 +1339,10 @@
             renderCategories();
             updateDashboard();
             updateUserSelect();
+            renderStock();
+            renderPurchases();
+            renderExpenses();
+            updateReport();
         }
 
         // ==================== TOAST ====================
@@ -1337,6 +1503,115 @@
                 updateDashboard();
                 showToast('Bidhaa imefutwa');
             }
+        }
+
+        // ==================== STOCK / PURCHASES / EXPENSES ====================
+        function renderStock() {
+            const tbody = document.getElementById('stockTableBody');
+            tbody.innerHTML = '';
+            if (!products.length) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:var(--gray);">Hakuna bidhaa</td></tr>';
+                return;
+            }
+            products.forEach((p, idx) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${idx+1}</td>
+                    <td>${p.name}</td>
+                    <td>${p.category || ''}</td>
+                    <td><strong>TSh ${p.price.toLocaleString()}</strong></td>
+                    <td>${p.stock ?? 0}</td>
+                    <td><button class="btn btn-outline" onclick="openAdjustStock(${p.id})">Adjust</button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function openAdjustStock(productId) {
+            const p = products.find(x => x.id === productId);
+            const qty = prompt('Enter stock adjustment (positive to add, negative to remove)', '0');
+            if (qty === null) return;
+            const n = parseInt(qty);
+            if (isNaN(n)) return showToast('Invalid quantity', 'error');
+            p.stock = (p.stock || 0) + n;
+            activityLog.push({ time: new Date().toLocaleTimeString(), user: currentUser ? currentUser.fullName : 'System', type: 'stock', action: `Adjusted ${p.name} by ${n}` });
+            renderStock(); renderProductsGrid(); renderProducts();
+            showToast('Stock updated', 'success');
+        }
+
+        function openPurchaseModal() {
+            const sel = document.getElementById('purchaseProduct');
+            sel.innerHTML = '';
+            products.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p.id; opt.textContent = `${p.name} (${p.category || ''})`;
+                sel.appendChild(opt);
+            });
+            document.getElementById('purchaseQty').value = 1;
+            document.getElementById('purchasePrice').value = 0;
+            document.getElementById('purchaseModal').classList.add('active');
+        }
+
+        function openExpenseModal() {
+            document.getElementById('expenseDesc').value = '';
+            document.getElementById('expenseAmount').value = 0;
+            document.getElementById('expenseModal').classList.add('active');
+        }
+
+        document.getElementById('purchaseForm').addEventListener('submit', function(e){
+            e.preventDefault();
+            const pid = parseInt(document.getElementById('purchaseProduct').value);
+            const qty = parseInt(document.getElementById('purchaseQty').value);
+            const price = parseFloat(document.getElementById('purchasePrice').value);
+            const id = purchases.length + 1;
+            purchases.push({ id, date: new Date().toISOString(), userId: currentUser ? currentUser.id : null, productId: pid, qty, price });
+            const p = products.find(x => x.id === pid);
+            p.stock = (p.stock || 0) + qty;
+            activityLog.unshift({ time: new Date().toLocaleTimeString(), user: currentUser ? currentUser.fullName : 'System', type: 'purchase', action: `Purchase ${qty} x ${p.name} at ${price}` });
+            document.getElementById('purchaseModal').classList.remove('active');
+            renderPurchases(); renderStock(); renderProductsGrid(); updateReport();
+            showToast('Purchase recorded', 'success');
+        });
+
+        document.getElementById('expenseForm').addEventListener('submit', function(e){
+            e.preventDefault();
+            const desc = document.getElementById('expenseDesc').value.trim();
+            const amount = parseFloat(document.getElementById('expenseAmount').value);
+            const id = expenses.length + 1;
+            expenses.push({ id, date: new Date().toISOString(), userId: currentUser ? currentUser.id : null, desc, amount });
+            activityLog.unshift({ time: new Date().toLocaleTimeString(), user: currentUser ? currentUser.fullName : 'System', type: 'expense', action: `Expense: ${desc} ${amount}` });
+            document.getElementById('expenseModal').classList.remove('active');
+            renderExpenses(); updateReport();
+            showToast('Expense recorded', 'success');
+        });
+
+        function renderPurchases() {
+            const tbody = document.getElementById('purchasesTableBody');
+            tbody.innerHTML = '';
+            if (!purchases.length) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--gray);">Hakuna manunuzi</td></tr>';
+                return;
+            }
+            purchases.slice().reverse().forEach(r => {
+                const p = products.find(x => x.id === r.productId) || { name: '-' };
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td>${new Date(r.date).toLocaleString()}</td><td>${currentUser ? currentUser.fullName : '-'}</td><td>${p.name}</td><td>${r.qty}</td><td>TSh ${r.price.toLocaleString()}</td>`;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderExpenses() {
+            const tbody = document.getElementById('expensesTableBody');
+            tbody.innerHTML = '';
+            if (!expenses.length) {
+                tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:var(--gray);">Hakuna gharama</td></tr>';
+                return;
+            }
+            expenses.slice().reverse().forEach(r => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td>${new Date(r.date).toLocaleString()}</td><td>${r.desc}</td><td>TSh ${r.amount.toLocaleString()}</td>`;
+                tbody.appendChild(tr);
+            });
         }
 
         // ==================== POS (POINT OF SALE) ====================
@@ -1504,6 +1779,7 @@
             renderCart();
             renderProductsGrid();
             renderProducts();
+            renderStock();
             updateDashboard();
             updateReport();
         }
@@ -1608,6 +1884,9 @@ ${transactions.slice().reverse().map(t => `
         document.addEventListener('DOMContentLoaded', function() {
             renderProductsGrid();
             renderCategories();
+            renderStock();
+            renderPurchases();
+            renderExpenses();
             updateReport();
         });
     </script>
